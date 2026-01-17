@@ -271,6 +271,15 @@ html, body {
   mix-blend-mode: normal;
 }
 
+.overlay-multiply {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);   /* controla la intensidad aquí */
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+
 /* ======================= */
 /* CONTADOR FULL WIDTH */
 /* ======================= */
@@ -425,6 +434,9 @@ html, body {
   <video autoplay muted loop playsinline>
     <source src="img/sombra1.mp4" type="video/mp4">
   </video>
+
+  <div class="overlay-multiply"></div>
+
 </div>
 
 <!-- ======================= -->
