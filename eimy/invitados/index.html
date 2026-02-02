@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Respuestas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: rgb(255, 255, 255);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: rgb(0, 0, 0);
+      padding: 20px 10px;
+      margin: 0;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    #contenedor {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      background-image: url("img/Fondo\ tarjeta.webp");
+      background-size: cover;
+      border-radius: 16px;
+      padding: 16px;
+      /*box-shadow: 0 10px 25px rgba(0,0,0,0.15);*/
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: aparecer 0.4s ease;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+      color: #000000;
+      word-break: break-word;
+    }
+
+    .card p {
+      margin: 6px 0;
+      font-size: 1rem;
+      color: #555;
+      word-break: break-word;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #414141;
+    }
+
+    input {
+  width: min(90%, 400px);
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+
+    background: #e1e1e1;
+  color: rgb(0, 0, 0);
+}
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 📱 Ajustes para celular */
+    @media (max-width: 480px) {
+      .card {
+        padding: 18px;
+      }
+
+      .card h3 {
+        font-size: 1.3rem;
+      }
+
+      .card p {
+        font-size: 1.05rem;
+      }
+    }
+
+#contador {
+  text-align: center;
+  color: rgb(21, 21, 21);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+#contadorFamilias {
+  text-align: center;
+  color: rgb(21, 21, 21);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+  </style>
+</head>
+<body>
+
+<div style="
+  display: flex;
+  justify-content: center; /* centra horizontal */
+  overflow: hidden;        /* evita scroll horizontal */
+">
+  <img 
+    src="img/Paginarecuerdos.webp"
+    alt="Invitados XV Eimy"
+    style="
+      height: 250px;     /* mantiene proporciones */
+      display: block;
+    "
+  >
+</div>
+
+<div id="contadorFamilias">Cargando...</div>
+<div id="contador">Cargando respuestas...</div>
+
+<div style="padding: 10px; text-align:center;">
+  <input 
+    type="text" 
+    id="buscador" 
+    placeholder="🔍 Buscar invitado o familia..."
+    style="
+      width: min(90%, 400px);
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    "
+  >
+</div>
+
+
+<div id="contenedor"></div>
+
+<script>
+const sheetID = "1rOH2w1MTFrqYy25ae5cjPYaZP8tNVy4RTS2EiMzqC8M";
+const url = `https://opensheet.elk.sh/${sheetID}/Respuestas%20de%20formulario%201`;
+
+let todasLasRespuestas = [];
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => {
+
+    if (!Array.isArray(data)) {
+      throw new Error("opensheet no devolvió datos");
+    }
+
+    todasLasRespuestas = data.reverse();
+
+    renderizar(todasLasRespuestas);
+
+    // Evento del buscador
+    document.getElementById("buscador").addEventListener("input", e => {
+      const texto = e.target.value.toLowerCase().trim();
+
+      const filtrados = todasLasRespuestas.filter(resp => {
+        return (
+          (resp["Nombre1"] || "").toLowerCase().includes(texto) ||
+          (resp["Nombre2"] || "").toLowerCase().includes(texto) ||
+          (resp["Nombre3"] || "").toLowerCase().includes(texto) ||
+          (resp["Nombre4"] || "").toLowerCase().includes(texto) ||
+          (resp["Nombre5"] || "").toLowerCase().includes(texto)
+        );
+      });
+
+      renderizar(filtrados);
+    });
+
+  })
+  .catch(err => {
+    console.error("ERROR:", err);
+    document.getElementById("contenedor").innerHTML =
+      "<p style='text-align:center'>❌ Error cargando datos</p>";
+  });
+
+function renderizar(lista) {
+  const contenedor = document.getElementById("contenedor");
+  contenedor.innerHTML = "";
+
+  let totalInvitados = 0;
+  let totalFamilias = lista.length;
+
+  lista.forEach(resp => {
+
+    function mostrar(label, valor) {
+      if (!valor || valor.trim() === "") return "";
+      totalInvitados++;
+      return `<p><span class="label">${label}</span> ${valor}</p>`;
+    }
+
+    let tarjeta = `<div class="card">`;
+
+    if (resp["Nombre1"] && resp["Nombre1"].trim() !== "") {
+      totalInvitados++;
+      tarjeta += `<h3>${resp["Nombre1"]}</h3>`;
+    } else {
+      tarjeta += `<h3>(Sin nombre)</h3>`;
+    }
+
+    tarjeta += `
+      ${mostrar("Invitado 2:", resp["Nombre2"])}
+      ${mostrar("Invitado 3:", resp["Nombre3"])}
+      ${mostrar("Invitado 4:", resp["Nombre4"])}
+      ${mostrar("Invitado 5:", resp["Nombre5"])}
+      <p><span class="label">Número:</span> ${resp["Numero"] || ""}</p>
+    </div>`;
+
+    contenedor.innerHTML += tarjeta;
+  });
+
+  document.getElementById("contador").textContent = 
+    `👥 Invitados mostrados: ${totalInvitados}`;
+
+  document.getElementById("contadorFamilias").textContent = 
+    `🏠 Familias mostradas: ${totalFamilias}`;
+}
+</script>
+
+
+
+
+</body>
+</html>
+
